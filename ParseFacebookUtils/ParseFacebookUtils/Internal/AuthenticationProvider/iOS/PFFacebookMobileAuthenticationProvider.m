@@ -45,9 +45,14 @@
                                                                      fromViewComtroller:(UIViewController *)viewController {
     
     NSArray *permissions = [readPermissions arrayByAddingObjectsFromArray:publishPermissions];
-                                                                       
+
+    // This is enough for combyne's use-case. Extended permissions (including publish permissions)
+    // are ignored, but we won't pass them in the first place.
+    FBSDKLoginConfiguration *configuration = [[FBSDKLoginConfiguration alloc] initWithPermissions:readPermissions
+                                                                                         tracking:FBSDKLoginTrackingLimited];
+
     BFTaskCompletionSource *taskCompletionSource = [BFTaskCompletionSource taskCompletionSource];
-    FBSDKLoginManagerLoginResultBlock resultHandler = ^(FBSDKLoginManagerLoginResult *result, NSError *error) {
+    FBSDKLoginManagerLoginResultBlock completion = ^(FBSDKLoginManagerLoginResult *result, NSError *error) {
         if (result.isCancelled) {
             [taskCompletionSource cancel];
         } else if (error) {
@@ -57,7 +62,7 @@
         }
     };
     
-    [self.loginManager logInWithPermissions:permissions fromViewController:viewController handler:resultHandler];
+    [self.loginManager logInFromViewController:viewController configuration:configuration completion:completion];
     
     return taskCompletionSource.task;
 }
