@@ -29,6 +29,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSDictionary *)userAuthenticationDataWithFacebookUserId:(NSString *)userId
                                                accessToken:(NSString *)accessToken
                                             expirationDate:(NSDate *)expirationDate;
++ (NSDictionary *)userAuthenticationDataWithFacebookUserId:(NSString *)userId
+                                       authenticationToken:(NSString *)authenticationToken;
++ (nullable NSDictionary *)userAuthenticationDataFromAuthenticationToken:(FBSDKAuthenticationToken *)token;
 + (nullable NSDictionary *)userAuthenticationDataFromAccessToken:(FBSDKAccessToken *)token;
 
 + (nullable FBSDKAccessToken *)facebookAccessTokenFromUserAuthenticationData:(nullable NSDictionary<NSString *, NSString *> *)authData;

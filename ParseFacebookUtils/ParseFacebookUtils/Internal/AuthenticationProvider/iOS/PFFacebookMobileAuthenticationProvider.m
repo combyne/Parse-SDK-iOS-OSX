@@ -43,9 +43,6 @@
 - (BFTask<NSDictionary<NSString *, NSString *>*> *)authenticateAsyncWithReadPermissions:(nullable NSArray<NSString *> *)readPermissions
                                                                      publishPermissions:(nullable NSArray<NSString *> *)publishPermissions
                                                                      fromViewComtroller:(UIViewController *)viewController {
-    
-    NSArray *permissions = [readPermissions arrayByAddingObjectsFromArray:publishPermissions];
-
     // This is enough for combyne's use-case. Extended permissions (including publish permissions)
     // are ignored, but we won't pass them in the first place.
     FBSDKLoginConfiguration *configuration = [[FBSDKLoginConfiguration alloc] initWithPermissions:readPermissions
@@ -58,7 +55,8 @@
         } else if (error) {
             taskCompletionSource.error = error;
         } else {
-            taskCompletionSource.result = [PFFacebookPrivateUtilities userAuthenticationDataFromAccessToken:result.token];
+            FBSDKAuthenticationToken *token = FBSDKAuthenticationToken.currentAuthenticationToken;
+            taskCompletionSource.result = [PFFacebookPrivateUtilities userAuthenticationDataFromAuthenticationToken:token];
         }
     };
     
@@ -75,7 +73,9 @@
     if (!authData) {
         [self.loginManager logOut];
     }
-    return [super restoreAuthenticationWithAuthData:authData];
+
+    // With limited login, there's no access token to restore since Graph API queries are impossible.
+    return YES;
 }
 
 @end
