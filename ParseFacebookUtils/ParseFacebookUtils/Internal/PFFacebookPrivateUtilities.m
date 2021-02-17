@@ -33,6 +33,17 @@
               @"expiration_date" : [[NSDateFormatter pffb_preciseDateFormatter] stringFromDate:expirationDate] };
 }
 
++ (NSDictionary *)userAuthenticationDataWithFacebookUserId:(NSString *)userId
+                                       authenticationToken:(NSString *)authenticationToken {
+    // The expiration date is provided for compatibility reasons but is, in fact, ignored.
+    // With Limited Login, the authentication token is provided through "token" instead of "access_token".
+    NSDate* expirationDate = [[NSDate new] dateByAddingTimeInterval:20];
+
+    return @{ @"id" : userId,
+              @"token" : authenticationToken,
+              @"expiration_date" : [[NSDateFormatter pffb_preciseDateFormatter] stringFromDate:expirationDate] };
+}
+
 + (nullable NSDictionary *)userAuthenticationDataFromAccessToken:(FBSDKAccessToken *)token {
     if (!token.userID || !token.tokenString || !token.expirationDate) {
         return nil;
@@ -41,6 +52,18 @@
     return [self userAuthenticationDataWithFacebookUserId:token.userID
                                               accessToken:token.tokenString
                                            expirationDate:token.expirationDate];
+}
+
++ (nullable NSDictionary *)userAuthenticationDataFromAuthenticationToken:(FBSDKAuthenticationToken *)token {
+    NSString *userID = FBSDKProfile.currentProfile.userID;
+    NSString *tokenString = token.tokenString;
+
+    if (!userID || !tokenString) {
+        return nil;
+    }
+
+    return [self userAuthenticationDataWithFacebookUserId:userID
+                                      authenticationToken:tokenString];
 }
 
 + (nullable FBSDKAccessToken *)facebookAccessTokenFromUserAuthenticationData:(nullable NSDictionary<NSString *, NSString *> *)authData {
