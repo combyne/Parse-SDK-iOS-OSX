@@ -45,8 +45,10 @@
                                                                      fromViewComtroller:(UIViewController *)viewController {
     // This is enough for combyne's use-case. Extended permissions (including publish permissions)
     // are ignored, but we won't pass them in the first place.
+    NSString *nonce = [[NSUUID UUID] UUIDString];
     FBSDKLoginConfiguration *configuration = [[FBSDKLoginConfiguration alloc] initWithPermissions:readPermissions
-                                                                                         tracking:FBSDKLoginTrackingLimited];
+                                                                                         tracking:FBSDKLoginTrackingLimited
+                                                                                            nonce:nonce];
 
     BFTaskCompletionSource *taskCompletionSource = [BFTaskCompletionSource taskCompletionSource];
     FBSDKLoginManagerLoginResultBlock completion = ^(FBSDKLoginManagerLoginResult *result, NSError *error) {
@@ -56,7 +58,14 @@
             taskCompletionSource.error = error;
         } else {
             FBSDKAuthenticationToken *token = FBSDKAuthenticationToken.currentAuthenticationToken;
-            taskCompletionSource.result = [PFFacebookPrivateUtilities userAuthenticationDataFromAuthenticationToken:token];
+
+            if (![nonce isEqualToString:token.nonce]) {
+                taskCompletionSource.error = [NSError errorWithDomain:PFParseErrorDomain
+                                                                 code:kPFErrorFacebookInvalidNonce
+                                                             userInfo:nil];
+            } else {
+                taskCompletionSource.result = [PFFacebookPrivateUtilities userAuthenticationDataFromAuthenticationToken:token];
+            }
         }
     };
     

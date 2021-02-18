@@ -348,6 +348,10 @@ typedef NS_ENUM(NSInteger, PFErrorCode) {
      Invalid linked session.
      */
     kPFErrorInvalidLinkedSession = 251,
+    /**
+     Invalid nonce returning while logging in with Facebook.
+     */
+    kPFErrorFacebookInvalidNonce = 252,
 };
 
 ///--------------------------------------
